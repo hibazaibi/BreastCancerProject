@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BreastCare AI – Patient Form</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #e91e63;
+    --primary-dark: #c2185b;
+    --neutral-900: #0a0e27;
+    --neutral-600: #4a5568;
+    --neutral-200: #e2e8f0;
+    --white: #ffffff;
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.15);
+  }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: var(--white);
+    color: var(--neutral-900);
+  }
+
+  /* NAVBAR */
+  nav {
+    background: var(--white);
+    padding: 1.25rem 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+
+  .nav-container {
+    max-width: 1400px;
+    padding: 0 2rem;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-decoration: none;
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 2.5rem;
+  }
+
+  .nav-links a {
+    color: var(--neutral-600);
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+
+  .nav-links a:hover { color: var(--primary); }
+
+  /* PAGE SECTION */
+  .form-section {
+    padding: 4rem 1rem;
+    background: linear-gradient(135deg, var(--white), #fde4ec);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-container {
+    max-width: 550px;
+    background: var(--white);
+    padding: 3rem;
+    margin: auto;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .section-title {
+    font-size: 2rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: var(--primary);
+  }
+
+  label {
+    font-weight: 600;
+    color: var(--neutral-900);
+    margin-bottom: 0.4rem;
+    display: block;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.9rem;
+    font-size: 1rem;
+    border: 2px solid var(--neutral-200);
+    border-radius: 12px;
+    margin-bottom: 1.4rem;
+    outline: none;
+    transition: 0.3s;
+  }
+
+  input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.15);
+  }
+
+  .btn-primary {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .dark-theme {
+    --white: #000;
+    --neutral-100: #111;
+    --neutral-200: #222;
+    --neutral-600: #ccc;
+    --neutral-900: #fff;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- 🔥 NAVBAR -->
+<nav>
+  <div class="nav-container">
+    <a class="logo" href="/">
+      <i class="fas fa-heartbeat"></i> BreastCare AI
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- 🌸 FORM SECTION -->
+<section class="form-section">
+  <div class="form-container">
+
+    <h2 class="section-title">Patient Information</h2>
+
+    <form id="patientForm">
+
+      <label>Name</label>
+      <input type="text" name="name" required>
+
+      <label>Age</label>
+      <input type="number" name="age" required>
+
+      <label>Email</label>
+      <input type="email" name="email" required>
+
+      <button class="btn-primary" type="submit">
+        Continue <i class="fas fa-arrow-right"></i>
+      </button>
+
+    </form>
+
+  </div>
+</section>
+
+<script>
+document.getElementById("patientForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+
+  const data = {
+    name: e.target.name.value.trim(),
+    age: Number(e.target.age.value),
+    email: e.target.email.value.trim()
+  };
+
+  // Basic validation
+  if (!data.name || !data.age || !data.email) {
+    alert("Please fill all fields.");
+    return;
+  }
+
+  try {
+    const res = await fetch("/save-patient", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    if (!result.patient_id) {
+      alert("❌ Error creating patient. Try again.");
+      return;
+    }
+
+    // Save ID in localStorage
+    localStorage.setItem("patient_id", result.patient_id);
+
+    // Redirect to choose diagnosis
+    window.location.href = "/choose-diagnosis";
+
+  } catch (err) {
+    alert("Server error, please try again later.");
+  }
+});
+
+// On page load, apply saved theme
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-theme");
+    const themeBtn = document.getElementById("themeToggle");
+    if (themeBtn) themeBtn.innerHTML = `<i class="fas fa-sun"></i>`;
+  }
+});
+</script>
+
+</body>
+</html>

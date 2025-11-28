@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Choose Diagnosis – BreastCare AI</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* MAIN THEME VARIABLES */
+:root {
+  --primary: #e91e63;
+  --primary-dark: #c2185b;
+  --neutral-900: #0a0e27;
+  --neutral-700: #2d3250;
+  --neutral-600: #4a5568;
+  --neutral-300: #e2e8f0;
+  --white: #ffffff;
+
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.15);
+
+  --glass-bg: rgba(255, 255, 255, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.4);
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: linear-gradient(135deg, #fde4ec, #fff0f7);
+  min-height: 100vh;
+  color: var(--neutral-900);
+}
+
+/* NAVBAR */
+nav {
+  background: var(--white);
+  padding: 1.25rem 0;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+.nav-container {
+  max-width: 1400px;
+  padding: 0 2rem;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+}
+.nav-links a {
+  text-decoration: none;
+  color: var(--neutral-600);
+  font-weight: 600;
+}
+.nav-links a:hover { color: var(--primary); }
+
+/* CONTAINER */
+.page-container {
+  max-width: 1200px;
+  margin: 4rem auto;
+  padding: 0 1.5rem;
+}
+
+.title {
+  text-align: center;
+  font-size: 2.6rem;
+  font-weight: 800;
+  margin-bottom: 3rem;
+  color: var(--primary);
+}
+
+/* GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2.5rem;
+}
+
+/* GLASS CARD */
+.glass-card {
+  text-decoration: none;
+  padding: 2.7rem 2.2rem;
+  border-radius: 22px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+  color: var(--neutral-900);
+  transition: 0.4s ease;
+  position: relative;
+}
+
+.glass-card:hover {
+  transform: translateY(-10px);
+  border-color: var(--primary);
+  box-shadow: 0 18px 40px rgba(233, 30, 99, 0.25);
+}
+
+.glass-icon {
+  font-size: 3.4rem;
+  color: var(--primary);
+  margin-bottom: 1rem;
+  transition: 0.3s;
+}
+
+.glass-card:hover .glass-icon {
+  transform: scale(1.15);
+  color: var(--primary-dark);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  margin-top: 1rem;
+}
+
+.card-text {
+  margin-top: 0.7rem;
+  color: var(--neutral-600);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+/* DARK THEME */
+.dark-theme {
+  --white: #000;
+  --neutral-100: #111;
+  --neutral-200: #222;
+  --neutral-600: #ccc;
+  --neutral-900: #fff;
+}
+
+.dark-theme body {
+  background: #0a0a0a;
+}
+
+.dark-theme nav {
+  background: #111;
+  box-shadow: 0 1px 3px rgba(255,255,255,0.06);
+}
+
+.dark-theme .glass-card {
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+}
+
+.dark-theme .glass-icon {
+  color: var(--primary);
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-container">
+    <a class="logo" href="/">
+      <i class="fas fa-heartbeat"></i> BreastCare AI
+    </a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="#">About</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- CONTENT -->
+<div class="page-container">
+  <h2 class="title">Choose Your Analysis</h2>
+
+  <div class="grid">
+
+    <a id="mammogramLink" class="glass-card">
+      <i class="fas fa-x-ray glass-icon"></i>
+      <div class="card-title">Mammogram Detection</div>
+      <p class="card-text">Upload a mammogram image for advanced AI-assisted detection.</p>
+    </a>
+
+    <a id="ultrasoundLink" class="glass-card">
+      <i class="fas fa-wave-square glass-icon"></i>
+      <div class="card-title">Ultrasound Detection</div>
+      <p class="card-text">Analyze ultrasound scans for tumor patterns and abnormalities.</p>
+    </a>
+
+    <a id="treatmentLink" class="glass-card">
+      <i class="fas fa-prescription-bottle-alt glass-icon"></i>
+      <div class="card-title">Treatment Recommendation</div>
+      <p class="card-text">Receive personalized treatment suggestions based on analysis.</p>
+    </a>
+
+  </div>
+</div>
+
+<script>
+// Ensure patient exists
+const patientId = localStorage.getItem("patient_id");
+
+if (!patientId) {
+  alert("❌ No patient found. Please enter patient information first.");
+  window.location.href = "/patient-form";
+}
+
+// Set dynamic links
+document.getElementById("mammogramLink").href = `/mammogram?patient_id=${patientId}`;
+document.getElementById("ultrasoundLink").href = `/ultrasound?patient_id=${patientId}`;
+document.getElementById("treatmentLink").href = `/recommendations?patient_id=${patientId}`;
+
+// Theme
+window.addEventListener("DOMContentLoaded", () => {
+  if (localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark-theme");
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BreastCare AI – Diagnostic Report</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #fde4ec, #fff7fc);
+    min-height: 100vh;
+    color: #0a0e27;
+  }
+
+  nav {
+    background: #fff;
+    padding: 1.3rem 0;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .nav-container {
+    max-width: 1400px;
+    padding: 0 2rem;
+    margin: auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .logo {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #e91e63;
+    display: flex;
+    gap: .6rem;
+    align-items: center;
+    text-decoration: none;
+  }
+  .nav-links { list-style: none; display: flex; gap: 2.2rem; }
+  .nav-links a { text-decoration: none; color: #4a5568; font-weight: 600; }
+  .nav-links a:hover { color: #e91e63; }
+
+  .page { max-width: 1200px; margin: 3rem auto; padding: 0 1.5rem; }
+
+  .title {
+    font-size: 2.6rem;
+    font-weight: 800;
+    color: #e91e63;
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  .section-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px,1fr));
+    gap: 1.8rem;
+  }
+
+  .glass-card {
+    background: rgba(255,255,255,0.25);
+    border: 1px solid rgba(255,255,255,0.4);
+    backdrop-filter: blur(18px);
+    border-radius: 20px;
+    padding: 1.8rem;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+  }
+
+  .glass-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    color: #e91e63;
+  }
+
+  .glass-card p { color: #4a5568; margin-bottom: .4rem; }
+
+  .img-preview-box {
+    margin-top: 1rem;
+    border-radius: 15px;
+    overflow: hidden;
+    border: 2px solid rgba(255,255,255,0.6);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.15);
+  }
+  .img-preview-box img { width: 100%; display: block; }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: .6rem;
+    padding: 1rem 2.4rem;
+    background: #e91e63;
+    color: white;
+    border-radius: 50px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 3rem;
+    transition: .3s;
+  }
+  .btn-primary:hover {
+    background: #c2185b;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(233,30,99,0.35);
+  }
+
+  .center { text-align: center; }
+  .alt-tag {
+    background: rgba(233,30,99,0.2);
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-weight: 600;
+    margin-right: 6px;
+    display: inline-block;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-container">
+    <a class="logo" href="/"><i class="fas fa-heartbeat"></i> BreastCare AI</a>
+    <ul class="nav-links">
+      <li><a href="/">Home</a></li>
+      <li><a href="/mammogram">Mammogram</a></li>
+      <li><a href="/ultrasound">Ultrasound</a></li>
+      <li><a href="/recommendations">Treatment</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page">
+  <h1 class="title">Full Diagnostic Report</h1>
+
+  <div class="section-grid">
+
+    <!-- PATIENT -->
+    <div class="glass-card">
+      <h3><i class="fas fa-user"></i> Patient Information</h3>
+      <p id="patientName"></p>
+      <p id="patientAge"></p>
+      <p id="patientEmail"></p>
+    </div>
+
+    <!-- MAMMOGRAM -->
+    <div class="glass-card" id="mammoSection">
+      <h3><i class="fas fa-x-ray"></i> Mammogram Analysis</h3>
+      <p id="mamDiag"></p>
+      <p id="mamMalig"></p>
+      <p id="mamBenign"></p>
+      <p id="mamConf"></p>
+    </div>
+
+    <div class="glass-card" id="mammoImageSection">
+      <h3><i class="fas fa-image"></i> Mammogram Image</h3>
+      <div class="img-preview-box" id="mammogramImageBox"></div>
+    </div>
+
+    <!-- ULTRASOUND -->
+    <div class="glass-card" id="usSection">
+      <h3><i class="fas fa-wave-square"></i> Ultrasound Analysis</h3>
+      <p id="usDiag"></p>
+      <p id="usMalig"></p>
+      <p id="usBenign"></p>
+      <p id="usNormal"></p>
+      <p id="usConf"></p>
+    </div>
+
+    <div class="glass-card" id="usImageSection">
+      <h3><i class="fas fa-image"></i> Ultrasound Image</h3>
+      <div class="img-preview-box" id="ultrasoundImageBox"></div>
+    </div>
+
+    <!-- TREATMENT -->
+    <div class="glass-card" id="treatSection">
+      <h3><i class="fas fa-prescription-bottle"></i> Treatment Recommendations</h3>
+      <p id="treatName"></p>
+      <p id="treatConf"></p>
+      <div id="treatAlternatives"></div>
+    </div>
+
+  </div>
+
+  <div class="center">
+    <button id="downloadPdf" class="btn-primary">
+      <i class="fas fa-file-download"></i> Download PDF Report
+    </button>
+  </div>
+</div>
+
+<script>
+// ========= GET PATIENT ID =========
+const params = new URLSearchParams(window.location.search);
+const patient_id = params.get("patient_id");
+if (!patient_id) alert("Missing patient_id");
+
+// ========= FETCH REPORT DATA =========
+let reportData = null;
+
+fetch(`/api/report/${patient_id}`)
+  .then(res => res.json())
+  .then(data => {
+
+    reportData = data; // SAVE FOR PDF GENERATION
+
+    // ===== PATIENT =====
+    const p = data.patient || {};
+    patientName.textContent = `Name: ${p.name || "-"}`;
+    patientAge.textContent = `Age: ${p.age || "-"}`;
+    patientEmail.textContent = `Email: ${p.email || "-"}`;
+
+    // ===== MAMMOGRAM =====
+    const mam = data.mammogram;
+    if (!mam || !mam.diagnosis) {
+      mammoSection.style.display = "none";
+      mammoImageSection.style.display = "none";
+    } else {
+      mamDiag.textContent = `Diagnosis: ${mam.diagnosis}`;
+      mamMalig.textContent = `Malignant Probability: ${mam.malignant}%`;
+      mamBenign.textContent = `Benign Probability: ${mam.benign}%`;
+      mamConf.textContent = `Confidence: ${mam.confidence}%`;
+
+      if (mam.image_base64) {
+        mammogramImageBox.innerHTML = `<img src="data:image/jpeg;base64,${mam.image_base64}">`;
+      }
+    }
+
+    // ===== ULTRASOUND =====
+    const us = data.ultrasound;
+    if (!us || !us.diagnosis) {
+      usSection.style.display = "none";
+      usImageSection.style.display = "none";
+    } else {
+      usDiag.textContent = `Diagnosis: ${us.diagnosis}`;
+      usMalig.textContent = `Malignant Probability: ${us.malignant}%`;
+      usBenign.textContent = `Benign Probability: ${us.benign}%`;
+      usNormal.textContent = `Normal Probability: ${us.normal || 0}%`;
+      usConf.textContent = `Confidence: ${us.confidence}%`;
+
+      if (us.image_base64) {
+        ultrasoundImageBox.innerHTML = `<img src="data:image/jpeg;base64,${us.image_base64}">`;
+      }
+    }
+
+    // ===== TREATMENT =====
+    const tr = data.treatment;
+    if (!tr || !tr.recommended) {
+      treatSection.style.display = "none";
+    } else {
+      treatName.textContent = `Recommended Treatment: ${tr.recommended}`;
+      treatConf.textContent = `Confidence: ${tr.confidence}%`;
+
+      const altBox = document.getElementById("treatAlternatives");
+      altBox.innerHTML = "";
+      (tr.alternatives || []).forEach(a => {
+        altBox.innerHTML += `<span class="alt-tag">${a}</span>`;
+      });
+    }
+  });
+
+
+// ========= FIXED PDF GENERATION =========
+downloadPdf.onclick = async () => {
+
+  if (!reportData) {
+    alert("Report data not loaded yet.");
+    return;
+  }
+
+  // We send JSON to /generate-report (POST)
+  const response = await fetch("/generate-report", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      patient: reportData.patient,
+      mammogram: reportData.mammogram,
+      ultrasound: reportData.ultrasound,
+      treatment: reportData.treatment,
+      images: {
+        mammogram: reportData.mammogram?.image_base64
+            ? "data:image/jpeg;base64," + reportData.mammogram.image_base64
+            : null,
+        ultrasound: reportData.ultrasound?.image_base64
+            ? "data:image/jpeg;base64," + reportData.ultrasound.image_base64
+            : null
+      }
+    })
+  });
+
+  // Convert the returned PDF to file download
+  const blob = await response.blob();
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "BreastCare_Report.pdf";
+  a.click();
+};
+</script>
+
+
+</body>
+</html>

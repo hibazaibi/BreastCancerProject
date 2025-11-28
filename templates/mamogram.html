@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BreastCare AI - Advanced Cancer Detection</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #e91e63;
+      --primary-dark: #c2185b;
+      --secondary: #f06292;
+      --accent: #ff1744;
+      --success: #06a77d;
+      --neutral-900: #0a0e27;
+      --neutral-800: #1a1f3a;
+      --neutral-700: #2d3250;
+      --neutral-600: #4a5568;
+      --neutral-400: #a0aec0;
+      --neutral-200: #e2e8f0;
+      --neutral-100: #f7fafc;
+      --white: #ffffff;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 12px 32px 0 rgba(0, 0, 0, 0.15);
+      --shadow-xl: 0 20px 48px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--white);
+      color: var(--neutral-900);
+      line-height: 1.6;
+    }
+
+    /* NAVIGATION */
+    nav {
+      background: var(--white);
+      padding: 1.25rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+
+    .logo i {
+      font-size: 1.75rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 3rem;
+      align-items: center;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--neutral-600);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+
+    .nav-links a:hover {
+      color: var(--primary);
+    }
+
+    .btn-nav {
+      background: var(--primary);
+      color: var(--white);
+      padding: 0.6rem 1.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-nav:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* UPLOAD SECTION */
+    .upload-section {
+      padding: 4rem 2rem;
+      background: linear-gradient(135deg, var(--white) 0%, #fce4ec 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+    }
+
+    .upload-container {
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow-xl);
+      padding: 3rem;
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .section-tag {
+      display: inline-block;
+      background: rgba(233, 30, 99, 0.1);
+      color: var(--primary);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: var(--neutral-900);
+      margin-bottom: 1rem;
+    }
+
+    .section-description {
+      font-size: 1.1rem;
+      color: var(--neutral-600);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .upload-area {
+      border: 3px dashed var(--primary);
+      border-radius: 15px;
+      padding: 3rem 2rem;
+      text-align: center;
+      background: rgba(233, 30, 99, 0.05);
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 1.5rem;
+    }
+
+    .upload-area:hover {
+      background: rgba(233, 30, 99, 0.1);
+      border-color: var(--primary-dark);
+    }
+
+    .upload-area.dragover {
+      background: rgba(233, 30, 99, 0.15);
+      border-color: var(--accent);
+    }
+
+    .upload-icon {
+      font-size: 4rem;
+      color: var(--primary);
+      margin-bottom: 1.5rem;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .file-info {
+      margin: 1.5rem 0;
+      padding: 1.25rem;
+      background: rgba(6, 167, 125, 0.1);
+      border-radius: 10px;
+      display: none;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .file-info.show {
+      display: flex;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: var(--white);
+      padding: 1rem 2.5rem;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 700;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 24px rgba(233, 30, 99, 0.3);
+      background: var(--primary-dark);
+    }
+
+    .btn-primary:disabled {
+      background: var(--neutral-400);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .spinner {
+      border: 4px solid rgba(233, 30, 99, 0.2);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 1.5rem;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .result {
+      display: none;
+      margin-top: 2rem;
+      padding: 2.5rem;
+      border-radius: 15px;
+      animation: slideIn 0.5s;
+    }
+
+    .result.show {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .result.benign {
+      background: linear-gradient(135deg, rgba(6, 167, 125, 0.15) 0%, rgba(6, 167, 125, 0.05) 100%);
+      border: 1px solid rgba(6, 167, 125, 0.3);
+    }
+
+    .result.malignant {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(239, 68, 68, 0.05) 100%);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .result h2 {
+      margin-bottom: 1.5rem;
+      font-size: 1.75rem;
+      display: flex;
+      align-items: center;
+    }
+
+    .probability {
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
+
+    .confidence {
+      font-size: 1rem;
+      opacity: 0.9;
+      margin-top: 1.5rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .error {
+      display: none;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+      padding: 1.25rem;
+      border-radius: 10px;
+      margin-top: 1.5rem;
+      border-left: 4px solid var(--danger);
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    .disclaimer {
+      margin-top: 2.5rem;
+      padding: 1.5rem;
+      background: rgba(255, 152, 0, 0.1);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: #e65100;
+      border-left: 4px solid #ff9800;
+    }
+
+    .info-cards {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 3rem;
+    }
+
+    .info-card {
+      flex: 1;
+      background: var(--white);
+      border-radius: 15px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow-md);
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .info-card i {
+      font-size: 2.5rem;
+      color: var(--primary);
+      margin-bottom: 1rem;
+    }
+
+    .info-card h3 {
+      color: var(--neutral-900);
+      margin-bottom: 0.75rem;
+      font-weight: 700;
+    }
+
+    .info-card p {
+      color: var(--neutral-600);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .progress-bar {
+      height: 8px;
+      background: rgba(255,255,255,0.3);
+      border-radius: 4px;
+      margin: 1rem 0;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    .progress-fill.malignant {
+      background: var(--primary);
+    }
+
+    .progress-fill.benign {
+      background: var(--success);
+    }
+
+    .result-icon {
+      margin-right: 0.75rem;
+      font-size: 1.75rem;
+    }
+
+    .btn-icon {
+      margin-right: 0.75rem;
+    }
+
+    .btn-remove {
+      background: var(--neutral-600);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-remove:hover {
+      background: var(--neutral-700);
+    }
+
+    /* FOOTER */
+    footer {
+      background: var(--neutral-900);
+      color: var(--neutral-400);
+      padding: 3rem 2rem;
+    }
+
+    .footer-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .footer-section h3 {
+      color: var(--white);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .footer-section ul {
+      list-style: none;
+    }
+
+    .footer-section ul li {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-section a {
+      color: var(--neutral-400);
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+
+    .footer-section a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding-top: 2rem;
+      text-align: center;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      .upload-container {
+        padding: 2rem 1.5rem;
+      }
+
+      .section-title {
+        font-size: 1.75rem;
+      }
+
+      .info-cards {
+        flex-direction: column;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .upload-area {
+        padding: 2rem 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .upload-section {
+        padding: 2rem 1rem;
+      }
+
+      .upload-container {
+        padding: 1.5rem 1rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
+
+      .btn-primary {
+        padding: 0.8rem 2rem;
+        font-size: 0.9rem;
+      }
+    }
+    .dark-theme {
+  --white: #000000;
+  --neutral-100: #111111;
+  --neutral-200: #222222;
+  --neutral-600: #cccccc;
+  --neutral-800: #f5f5f5;
+  --neutral-900: #ffffff;
+  --primary: #e91e63;
+  --primary-dark: #ad0054;
+  --secondary: #ff5c8d;
+  --success: #06a77d;
+}
+
+  </style>
+</head>
+<body>
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="nav-container">
+      <a href="#" class="logo">
+        <i class="fas fa-heartbeat"></i>
+        <span>BreastCare AI</span>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#features">Features</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#contact">Contact</a></li>
+        <li><a href="#" class="btn-nav">Sign In</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- UPLOAD SECTION -->
+  <section class="upload-section">
+    <div class="upload-container">
+      <div class="section-header">
+        <h2 class="section-title">Upload Mammogram for Analysis</h2>
+        <p class="section-description">Our advanced AI model analyzes mammogram images to detect potential signs of breast cancer with high accuracy.</p>
+      </div>
+
+      <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">
+          <i class="fas fa-file-medical-alt"></i>
+        </div>
+        <p><strong>Click to upload</strong> or drag and drop</p>
+        <p style="font-size: 0.9rem; color: var(--neutral-600); margin-top: 0.75rem;">
+          Supported formats: PNG, JPG, JPEG, DCM (Max size: 10MB)
+        </p>
+        <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.dcm">
+      </div>
+
+      <div class="file-info" id="fileInfo">
+        <div>
+          <strong>Selected file:</strong> <span id="fileName"></span>
+        </div>
+        <button class="btn-remove" id="removeFile">
+          <i class="fas fa-times"></i> Remove
+        </button>
+      </div>
+
+      <button id="predictBtn" class="btn-primary" disabled>
+        <i class="fas fa-search btn-icon"></i> Analyze Mammogram
+      </button>
+
+      <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Analyzing image... This may take a few moments</p>
+      </div>
+
+      <div class="result" id="result">
+        <h2 id="resultTitle">
+          <i class="fas fa-check-circle result-icon"></i>
+          <span>Analysis Complete</span>
+        </h2>
+
+        <div class="probability">
+          <strong>Malignant Probability:</strong> <span id="malignantProb"></span>
+          <div class="progress-bar">
+            <div class="progress-fill malignant" id="malignantBar"></div>
+          </div>
+        </div>
+        <div class="probability">
+          <strong>Benign Probability:</strong> <span id="benignProb"></span>
+          <div class="progress-bar">
+            <div class="progress-fill benign" id="benignBar"></div>
+          </div>
+        </div>
+        <div class="confidence">
+          Confidence Level: <strong><span id="confidence"></span></strong>
+        </div>
+      </div>
+<button id="goToReport" class="btn-primary" style="margin-top: 1.5rem;">
+  <i class="fas fa-file-medical-alt"></i> View Full Report
+</button>
+
+      <div class="error" id="error"></div>
+
+      <div class="disclaimer">
+        <strong><i class="fas fa-exclamation-triangle"></i> Medical Disclaimer:</strong> This tool is for research and educational purposes only.
+        It should NOT be used as a substitute for professional medical diagnosis.
+        Always consult qualified healthcare professionals for medical advice.
+      </div>
+
+      <div class="info-cards">
+        <div class="info-card">
+          <i class="fas fa-heartbeat"></i>
+          <h3>Early Detection</h3>
+          <p>Early detection of breast cancer can significantly improve treatment outcomes.</p>
+        </div>
+        <div class="info-card">
+          <i class="fas fa-robot"></i>
+          <h3>AI Technology</h3>
+          <p>Our advanced AI model is trained on thousands of mammogram images.</p>
+        </div>
+        <div class="info-card">
+          <i class="fas fa-shield-alt"></i>
+          <h3>Privacy First</h3>
+          <p>Your medical data is encrypted and never stored on our servers.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>Product</h3>
+        <ul>
+          <li><a href="#">Features</a></li>
+          <li><a href="#">Pricing</a></li>
+          <li><a href="#">Security</a></li>
+          <li><a href="#">Documentation</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Company</h3>
+        <ul>
+          <li><a href="#">About</a></li>
+          <li><a href="#">Blog</a></li>
+          <li><a href="#">Careers</a></li>
+          <li><a href="#">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Resources</h3>
+        <ul>
+          <li><a href="#">Research</a></li>
+          <li><a href="#">Case Studies</a></li>
+          <li><a href="#">Webinars</a></li>
+          <li><a href="#">Support</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>Legal</h3>
+        <ul>
+          <li><a href="#">Privacy Policy</a></li>
+          <li><a href="#">Terms of Service</a></li>
+          <li><a href="#">Cookie Policy</a></li>
+          <li><a href="#">Compliance</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 BreastCare AI. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+      // 🔥 PATIENT ID FIX (do NOT edit anything else)
+let patient_id = localStorage.getItem("patient_id");
+
+// Try reading from URL
+const urlParams = new URLSearchParams(window.location.search);
+if (urlParams.get("patient_id")) {
+  patient_id = urlParams.get("patient_id");
+  localStorage.setItem("patient_id", patient_id);
+}
+
+// If still missing → redirect
+if (!patient_id) {
+  alert("Missing patient ID. Please fill the patient form first.");
+  window.location.href = "/form";
+}
+
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const predictBtn = document.getElementById('predictBtn');
+    const loading = document.getElementById('loading');
+    const result = document.getElementById('result');
+    const error = document.getElementById('error');
+    const removeFileBtn = document.getElementById('removeFile');
+
+    let selectedFile = null;
+
+    // Click to upload
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        handleFileSelect(files[0]);
+      }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        handleFileSelect(e.target.files[0]);
+      }
+    });
+
+    // Remove file
+    removeFileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      selectedFile = null;
+      fileInput.value = '';
+      fileInfo.classList.remove('show');
+      predictBtn.disabled = true;
+      result.classList.remove('show');
+      error.classList.remove('show');
+    });
+
+    function handleFileSelect(file) {
+      // Check file size (max 10MB)
+      if (file.size > 10 * 1024 * 1024) {
+        showError('File size exceeds 10MB limit. Please choose a smaller file.');
+        return;
+      }
+
+      selectedFile = file;
+      fileName.textContent = file.name;
+      fileInfo.classList.add('show');
+      predictBtn.disabled = false;
+      result.classList.remove('show');
+      error.classList.remove('show');
+      const reader = new FileReader();
+reader.onload = function(e) {
+  localStorage.setItem("mammogramImage", e.target.result);
+  console.log("Saved Base64 image");
+};
+reader.readAsDataURL(file);
+    }
+
+    // Predict
+    predictBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
+      // Show loading
+      loading.classList.add('show');
+      predictBtn.disabled = true;
+      result.classList.remove('show');
+      error.classList.remove('show');
+
+      try {
+        // Simulate API call - replace with actual endpoint
+        const response = await fetch(`/predict?patient_id=${localStorage.getItem("patient_id")}`, {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        loading.classList.remove('show');
+
+        if (data.error) {
+          showError(data.error);
+        } else {
+          showResult(data);
+        }
+      } catch (err) {
+        loading.classList.remove('show');
+        showError('Network error: ' + err.message);
+      }
+
+      predictBtn.disabled = false;
+
+    });
+
+ function showResult(data) {
+    const mammo = data.mammo_result;
+    const decision = data.decision;
+
+    const malignantProb = parseFloat(mammo.probability_malignant);
+    const benignProb = parseFloat(mammo.probability_benign);
+    const confidence = parseFloat(mammo.confidence);
+
+    const isMalignant = mammo.prediction === "MALIGNANT";
+
+    // UI Colors
+    result.className = 'result show ' + (isMalignant ? 'malignant' : 'benign');
+
+    // Title
+    document.getElementById('resultTitle').innerHTML = isMalignant
+        ? '<i class="fas fa-exclamation-triangle result-icon"></i><span>Potential Malignancy Detected</span>'
+        : '<i class="fas fa-check-circle result-icon"></i><span>No Malignancy Detected</span>';
+
+    // Probabilities
+    document.getElementById('malignantProb').textContent = malignantProb.toFixed(2) + '%';
+    document.getElementById('benignProb').textContent = benignProb.toFixed(2) + '%';
+    document.getElementById('confidence').textContent = confidence.toFixed(2) + '%';
+
+    // Progress bars
+    document.getElementById('malignantBar').style.width = malignantProb + '%';
+    document.getElementById('benignBar').style.width = benignProb + '%';
+
+    // SAVE RESULT FOR REPORT PAGE
+    const mammogramResult = {
+        diagnosis: mammo.prediction,
+        malignant: malignantProb,
+        benign: benignProb,
+        confidence: confidence,
+        risk_level: decision.risk_level,
+        actions: decision.actions,
+        need_ultrasound: decision.need_ultrasound,
+        timestamp: new Date().toISOString()
+    };
+
+    localStorage.setItem('mammogramResult', JSON.stringify(mammogramResult));
+
+    // ================================
+    // 🎛️ SHOW USER OPTIONS
+    // ================================
+    const actionsContainer = document.createElement("div");
+    actionsContainer.style.marginTop = "20px";
+    actionsContainer.style.display = "flex";
+    actionsContainer.style.gap = "15px";
+    actionsContainer.style.flexWrap = "wrap";
+
+    // If model recommends ultrasound
+    if (decision.need_ultrasound) {
+        const btnUS = document.createElement("button");
+        btnUS.className = "btn-primary";
+        btnUS.innerHTML = '<i class="fas fa-wave-square"></i> Upload Ultrasound';
+btnUS.onclick = () => window.location.href = `/ultrasound?patient_id=${patient_id}`;
+        actionsContainer.appendChild(btnUS);
+    }
+
+
+    // Add actions under result
+    result.appendChild(actionsContainer);
+}
+
+    function showError(message) {
+      error.textContent = '❌ Error: ' + message;
+      error.classList.add('show');
+    }
+    const goToReportBtn = document.getElementById('goToReport');
+goToReportBtn.addEventListener('click', () => {
+  window.location.href =  `/report?patient_id=${patient_id}`;
+});
+// On page load, apply saved theme
+window.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("theme");
+
+  if (savedTheme === "dark") {
+    document.body.classList.add("dark-theme");
+    const themeBtn = document.getElementById("themeToggle");
+    if (themeBtn) themeBtn.innerHTML = `<i class="fas fa-sun"></i>`;
+  }
+});
+
+  </script>
+</body>
+</html>

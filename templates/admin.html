@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Dashboard – BreastCare AI</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #e91e63;
+        --primary-light: #fce4ec;
+        --secondary: #2196f3;
+        --success: #06a77d;
+        --danger: #f44336;
+        --warning: #ff9800;
+        --dark: #1a1a2e;
+        --light: #f8f9fa;
+        --gray: #6c757d;
+        --white: #ffffff;
+        --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+        --border-radius: 12px;
+        --transition: all 0.3s ease;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        background-color: #f5f7fb;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .dashboard-container {
+        display: flex;
+        min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+        width: 260px;
+        background: var(--white);
+        box-shadow: var(--shadow);
+        padding: 1.5rem 0;
+        transition: var(--transition);
+        z-index: 100;
+    }
+
+    .logo-container {
+        padding: 0 1.5rem 1.5rem;
+        border-bottom: 1px solid #eee;
+        margin-bottom: 1.5rem;
+    }
+
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        font-weight: 800;
+        font-size: 1.5rem;
+        color: var(--primary);
+    }
+
+    .logo i {
+        font-size: 1.8rem;
+    }
+
+    .nav-links {
+        list-style: none;
+        padding: 0 1rem;
+    }
+
+    .nav-links li {
+        margin-bottom: 0.5rem;
+    }
+
+    .nav-links a {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.85rem 1rem;
+        border-radius: var(--border-radius);
+        color: var(--gray);
+        text-decoration: none;
+        font-weight: 600;
+        transition: var(--transition);
+    }
+
+    .nav-links a:hover, .nav-links a.active {
+        background-color: var(--primary-light);
+        color: var(--primary);
+    }
+
+    .nav-links a i {
+        width: 20px;
+        text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+        flex: 1;
+        padding: 1.5rem 2rem;
+        overflow-y: auto;
+    }
+
+    /* Header */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .header h1 {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--dark);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .user-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background-color: var(--primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: var(--transition);
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+
+    .stat-icon.patients {
+        background-color: rgba(233, 30, 99, 0.1);
+        color: var(--primary);
+    }
+
+    .stat-icon.diagnoses {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: var(--secondary);
+    }
+
+    .stat-icon.positive {
+        background-color: rgba(244, 67, 54, 0.1);
+        color: var(--danger);
+    }
+
+    .stat-icon.negative {
+        background-color: rgba(6, 167, 125, 0.1);
+        color: var(--success);
+    }
+
+    .stat-info h3 {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--gray);
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-info p {
+        font-size: 1.8rem;
+        font-weight: 800;
+        color: var(--dark);
+    }
+
+    /* Charts Section */
+    .charts-section {
+        margin-bottom: 2rem;
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .export-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.7rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+    }
+
+    .export-btn:hover {
+        background: #c2185b;
+        transform: translateY(-2px);
+    }
+
+    .charts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .chart-container {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        box-shadow: var(--shadow);
+        height: 300px;
+    }
+
+    .chart-container h3 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--dark);
+    }
+
+    .chart-box {
+        height: calc(100% - 2rem);
+        position: relative;
+    }
+
+    /* Patients Table */
+    .patients-section {
+        background: var(--white);
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .table-header h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--dark);
+    }
+
+    .search-container {
+        position: relative;
+        width: 300px;
+    }
+
+    .search-container input {
+        width: 100%;
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        font-size: 0.9rem;
+        transition: var(--transition);
+    }
+
+    .search-container input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+    }
+
+    .search-container i {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--gray);
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        padding: 1rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 0.9rem;
+    }
+
+    td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+        font-size: 0.9rem;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover {
+        background-color: rgba(233, 30, 99, 0.03);
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.3rem 0.7rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+    }
+
+    .status-badge.malignant {
+        background-color: rgba(233, 30, 99, 0.1);
+        color: var(--primary);
+    }
+
+    .status-badge.benign {
+        background-color: rgba(6, 167, 125, 0.1);
+        color: var(--success);
+    }
+
+    .status-badge.normal {
+        background-color: rgba(33, 150, 243, 0.1);
+        color: var(--secondary);
+    }
+
+    .btn-view {
+        background: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        font-size: 0.85rem;
+        transition: var(--transition);
+    }
+
+    .btn-view:hover {
+        background: #c2185b;
+        transform: translateY(-2px);
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+        .dashboard-container {
+            flex-direction: column;
+        }
+
+        .sidebar {
+            width: 100%;
+            padding: 1rem;
+        }
+
+        .nav-links {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 0.5rem;
+        }
+
+        .nav-links li {
+            margin-bottom: 0;
+            margin-right: 0.5rem;
+        }
+
+        .nav-links a {
+            white-space: nowrap;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .main-content {
+            padding: 1rem;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .charts-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .table-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .search-container {
+            width: 100%;
+        }
+
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+    }
+</style>
+</head>
+
+<body>
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-container">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                <span>BreastCare AI</span>
+            </div>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="active"><i class="fas fa-chart-pie"></i> Dashboard</a></li>
+            <li><a href="#"><i class="fas fa-users"></i> Patients</a></li>
+            <li><a href="#"><i class="fas fa-stethoscope"></i> Diagnoses</a></li>
+            <li><a href="#"><i class="fas fa-chart-line"></i> Analytics</a></li>
+            <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+            <li><a href="#"><i class="fas fa-question-circle"></i> Help</a></li>
+        </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Admin Dashboard</h1>
+            <div class="user-info">
+                <div class="user-avatar">AD</div>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon patients">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Patients</h3>
+                    <p id="totalPatients">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon diagnoses">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Total Diagnoses</h3>
+                    <p id="totalDiagnoses">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon positive">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Positive Cases</h3>
+                    <p id="positiveCases">0</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon negative">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-info">
+                    <h3>Negative Cases</h3>
+                    <p id="negativeCases">0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="charts-section">
+            <div class="section-header">
+                <h2>Diagnostic Analytics</h2>
+                <button class="export-btn" onclick="exportCSV()">
+                    <i class="fas fa-download"></i> Export CSV
+                </button>
+            </div>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <h3>Mammogram Results</h3>
+                    <div class="chart-box">
+                        <canvas id="mammoPie"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Ultrasound Results</h3>
+                    <div class="chart-box">
+                        <canvas id="ultraPie"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Treatment Distribution</h3>
+                    <div class="chart-box">
+                        <canvas id="treatChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-container">
+                    <h3>Diagnoses Over Time</h3>
+                    <div class="chart-box">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Patients Table -->
+        <div class="patients-section">
+            <div class="table-header">
+                <h2>All Patients</h2>
+                <div class="search-container">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search patient...">
+                </div>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Email</th>
+                        <th>Diagnoses</th>
+                        <th>Last Diagnosis</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="patientsTable"></tbody>
+            </table>
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    async function loadPatients() {
+        try {
+            // Fetch patients data from your API
+            const res = await fetch("/api/admin/patients");
+            const data = await res.json();
+            document.getElementById("totalPatients").innerText = data.length;
+
+            const table = document.getElementById("patientsTable");
+            table.innerHTML = "";
+
+            data.forEach(p => {
+                // Determine status based on last diagnosis or other criteria
+                const status = getStatusFromPatientData(p);
+                const statusClass = status.toLowerCase();
+
+                table.innerHTML += `
+                    <tr>
+                        <td>${p.name}</td>
+                        <td>${p.age}</td>
+                        <td>${p.email}</td>
+                        <td>${p.diagnosis_count}</td>
+                        <td>${p.last_diagnosis}</td>
+                        <td><span class="status-badge ${statusClass}">${status}</span></td>
+                        <td><button class="btn-view" onclick="view(${p.id})">View</button></td>
+                    </tr>`;
+            });
+
+            // Fetch diagnoses data from your API
+            const diagRes = await fetch("/api/admin/diagnoses");
+            const diagnoses = await diagRes.json();
+            document.getElementById("totalDiagnoses").innerText = diagnoses.length;
+
+            // Calculate positive and negative cases based on your actual data
+            const positiveCases = diagnoses.filter(d =>
+                d.diagnosis === "MALIGNANT" ||
+                (d.type === "treatment" && d.diagnosis !== "NORMAL")
+            ).length;
+
+            const negativeCases = diagnoses.filter(d =>
+                d.diagnosis === "BENIGN" ||
+                d.diagnosis === "NORMAL"
+            ).length;
+
+            document.getElementById("positiveCases").innerText = positiveCases;
+            document.getElementById("negativeCases").innerText = negativeCases;
+
+            // Calculate chart data from your actual diagnoses
+            let mamMal = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "MALIGNANT").length;
+            let mamBen = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "BENIGN").length;
+
+            let usMal  = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "MALIGNANT").length;
+            let usBen  = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "BENIGN").length;
+            let usNorm = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "NORMAL").length;
+
+            let treatCounts = {};
+            diagnoses.filter(d => d.type === "treatment").forEach(d => {
+                treatCounts[d.diagnosis] = (treatCounts[d.diagnosis] || 0) + 1;
+            });
+
+            let dateCounts = {};
+            diagnoses.forEach(d => {
+                let date = d.created_at.split(" ")[0];
+                dateCounts[date] = (dateCounts[date] || 0) + 1;
+            });
+
+            drawMammoPie(mamMal, mamBen);
+            drawUltraPie(usMal, usBen, usNorm);
+            drawTreatmentChart(treatCounts);
+            drawLineChart(dateCounts);
+
+            window.exportData = data;
+
+        } catch (error) {
+            console.error("Error loading dashboard data:", error);
+        }
+    }
+
+    // Helper function to determine patient status
+    function getStatusFromPatientData(patient) {
+        // You can modify this based on your actual data structure
+        // This is a placeholder - adjust according to your needs
+        if (patient.last_diagnosis && patient.last_diagnosis.includes("MALIGNANT")) {
+            return "Malignant";
+        } else if (patient.last_diagnosis && patient.last_diagnosis.includes("BENIGN")) {
+            return "Benign";
+        } else {
+            return "Normal";
+        }
+    }
+
+    function drawMammoPie(mamMal, mamBen) {
+        new Chart(document.getElementById("mammoPie"), {
+            type: "pie",
+            data: {
+                labels: ["Malignant", "Benign"],
+                datasets: [{
+                    data: [mamMal, mamBen],
+                    backgroundColor: ["#e91e63", "#06a77d"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function drawUltraPie(usMal, usBen, usNorm) {
+        new Chart(document.getElementById("ultraPie"), {
+            type: "pie",
+            data: {
+                labels: ["Malignant", "Benign", "Normal"],
+                datasets: [{
+                    data: [usMal, usBen, usNorm],
+                    backgroundColor: ["#e91e63", "#06a77d", "#2196f3"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function drawTreatmentChart(treatCounts) {
+        new Chart(document.getElementById("treatChart"), {
+            type: "pie",
+            data: {
+                labels: Object.keys(treatCounts),
+                datasets: [{
+                    data: Object.values(treatCounts),
+                    backgroundColor: [
+                        "#e91e63", "#06a77d", "#2196f3",
+                        "#ff9800", "#9c27b0", "#3f51b5"
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+
+    function drawLineChart(dateCounts) {
+        const labels = Object.keys(dateCounts).sort();
+        const values = labels.map(k => dateCounts[k]);
+
+        new Chart(document.getElementById("lineChart"), {
+            type: "line",
+            data: {
+                labels,
+                datasets: [{
+                    label: "Diagnoses Over Time",
+                    data: values,
+                    borderColor: "#e91e63",
+                    backgroundColor: "rgba(233,30,99,0.2)",
+                    fill: true,
+                    tension: 0.3
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    function view(id) {
+        localStorage.setItem("patient_id", id);
+        window.location.href = "/history";
+    }
+
+    function exportCSV() {
+        let csv = "Name,Age,Email,Diagnosis Count,Last Diagnosis\n";
+        window.exportData.forEach(p => {
+            csv += `${p.name},${p.age},${p.email},${p.diagnosis_count},${p.last_diagnosis}\n`;
+        });
+
+        const blob = new Blob([csv], { type: "text/csv" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "breastcare_patients.csv";
+        a.click();
+    }
+
+    // Search functionality
+    document.getElementById("searchInput").addEventListener("input", function () {
+        let value = this.value.toLowerCase();
+        let rows = document.querySelectorAll("#patientsTable tr");
+
+        rows.forEach(row => {
+            let text = row.innerText.toLowerCase();
+            row.style.display = text.includes(value) ? "" : "none";
+        });
+    });
+
+    // Initialize the dashboard
+    loadPatients();
+</script>
+</body>
+</html>
