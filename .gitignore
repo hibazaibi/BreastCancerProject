@@ -1,9 +1,29 @@
-venv/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+
+# Uploaded files
 uploads/
+
+# Environment secrets
 .env
-*.pkl
-*.h5
+
+# Model files (TOO LARGE)
 *.keras
-static/model/*.keras
+*.h5
+*.pkl
+model/
+
+# Node modules (NEVER PUSH)
+node_modules/
+
+# Cache
+.DS_Store
+*.log
+
