@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BreastCare AI – Treatment Recommendations</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #e91e63;
+      --primary-dark: #c2185b;
+      --success: #06a77d;
+      --neutral-900: #0a0e27;
+      --neutral-600: #4a5568;
+      --neutral-100: #f7fafc;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: linear-gradient(135deg, #fde4ec, #fff7fc);
+      min-height: 100vh;
+      color: var(--neutral-900);
+    }
+
+    nav {
+      background: rgba(255,255,255,0.95);
+      padding: 1.4rem 0;
+      position: sticky;
+      top: 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      z-index: 1000;
+    }
+    .nav-container {
+      max-width: 1400px;
+      margin: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 2rem;
+    }
+    .logo {
+      font-size: 1.7rem;
+      font-weight: 800;
+      text-decoration: none;
+      color: var(--primary);
+      display: flex;
+      gap: .5rem;
+      align-items: center;
+    }
+    .nav-links a {
+      text-decoration: none;
+      font-weight: 600;
+      color: var(--neutral-600);
+      margin-left: 2rem;
+    }
+    .nav-links a:hover { color: var(--primary); }
+
+    .page {
+      max-width: 1100px;
+      margin: 3rem auto;
+      padding: 0 2rem;
+    }
+
+    .title {
+      font-size: 2.8rem;
+      text-align: center;
+      font-weight: 800;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--neutral-600);
+      margin-bottom: 2rem;
+    }
+
+    .glass-card {
+      background: rgba(255,255,255,0.3);
+      border-radius: 20px;
+      padding: 2rem;
+      backdrop-filter: blur(15px);
+      margin-bottom: 2rem;
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(250px,1fr));
+      gap: 1.5rem;
+    }
+
+    .form-group { display: flex; flex-direction: column; gap: .3rem; }
+    .form-group input, .form-group select {
+      padding: .8rem 1rem;
+      border-radius: 12px;
+      border: 1px solid rgba(233,30,99,.3);
+    }
+
+    .btn-primary {
+      width: 100%;
+      padding: 1rem 2rem;
+      border-radius: 60px;
+      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      border: none;
+      margin-top: 2rem;
+      cursor: pointer;
+    }
+
+    .hidden { display: none; }
+
+    .result-card {
+      padding: 2rem;
+      text-align: center;
+      border-radius: 20px;
+      background: rgba(6,167,125,0.08);
+      border: 1px solid rgba(6,167,125,0.3);
+    }
+    .result-card.malignant {
+      background: rgba(233,30,99,0.08);
+      border: 1px solid rgba(233,30,99,0.3);
+    }
+    .result-title {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg,var(--primary),var(--primary-dark));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      margin-bottom: 1rem;
+    }
+
+    .alt-tag {
+      background: rgba(233,30,99,.2);
+      color: var(--primary);
+      padding: .5rem 1rem;
+      border-radius: 30px;
+      margin: .3rem;
+      display: inline-block;
+    }
+
+    #downloadReportBtn {
+      margin-top: 2rem;
+      width: auto;
+      padding: 1rem 2rem;
+    }
+
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <a class="logo" href="/"><i class="fas fa-heartbeat"></i> BreastCare AI</a>
+      <div class="nav-links">
+        <a href="/">Home</a>
+        <a href="/mammogram">Mammogram</a>
+        <a href="/ultrasound">Ultrasound</a>
+        <a href="/recommendations">Recommendations</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="page">
+
+    <h1 class="title">Treatment Recommendations</h1>
+    <p class="subtitle">Enter clinical data to get personalized treatment suggestions.</p>
+
+    <!-- FORM -->
+    <div id="formSection" class="glass-card">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Age at diagnosis</label>
+          <input id="age" type="number">
+        </div>
+
+        <div class="form-group">
+          <label>Tumor Size (mm)</label>
+          <input id="tumorSize" type="number" step=".1" placeholder="e.g. 25.5">
+        </div>
+
+        <div class="form-group">
+          <label>Tumor Stage</label>
+          <select id="tumorStage">
+            <option value="">Select</option>
+            <option>1</option><option>2</option><option>3</option><option>4</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Positive Lymph Nodes</label>
+          <input id="lymphNodes" type="number" placeholder="e.g. 2">
+        </div>
+
+        <div class="form-group">
+          <label>NPI</label>
+          <input id="npi" type="number" step=".01" placeholder="e.g. 4.2">
+        </div>
+
+        <div class="form-group">
+          <label>Histologic Grade</label>
+          <select id="grade">
+            <option value="">Select</option>
+            <option>1</option><option>2</option><option>3</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Menopausal State</label>
+          <select id="menopausal">
+            <option value="">Select</option>
+            <option value="pre">Pre-menopausal</option>
+            <option value="post">Post-menopausal</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>ER Status</label>
+          <select id="erStatus">
+            <option value="">Select</option>
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>PR Status</label>
+          <select id="prStatus">
+            <option value="">Select</option>
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>HER2 Status</label>
+          <select id="her2Status">
+            <option value="">Select</option>
+            <option value="positive">Positive</option>
+            <option value="negative">Negative</option>
+          </select>
+        </div>
+
+      </div>
+
+      <button class="btn-primary" onclick="submitForm()">
+        <i class="fas fa-stethoscope"></i> Generate Recommendation
+      </button>
+    </div>
+
+    <!-- RESULT -->
+    <div id="resultSection" class="glass-card hidden">
+      <div id="resultCard" class="result-card">
+        <h2 id="treatmentName" class="result-title">Treatment</h2>
+
+        <p>Confidence: <strong id="confidenceBadge">0%</strong></p>
+
+        <div id="alternativesContainer"></div>
+
+        <button id="downloadReportBtn" class="btn-primary">
+          <i class="fas fa-file-pdf"></i> Download Full Report
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+
+/* -------------------------------
+   GET patient_id FROM URL
+--------------------------------*/
+const url = new URL(window.location.href);
+const patient_id = url.searchParams.get("patient_id");
+
+if (!patient_id) {
+  alert("Missing patient_id. Redirecting...");
+  window.location.href = "/form";
+}
+
+/* Save it for continuity */
+localStorage.setItem("patient_id", patient_id);
+
+/* -------------------------------
+   SUBMIT FORM
+--------------------------------*/
+async function submitForm() {
+
+  const data = {
+    age_at_diagnosis: age.value,
+    tumor_size: tumorSize.value,
+    tumor_stage: tumorStage.value,
+    lymph_nodes_positive: lymphNodes.value,
+    nottingham_index: npi.value,
+    grade: grade.value,
+    menopausal: menopausal.value,
+    er: erStatus.value,
+    pr: prStatus.value,
+    her2: her2Status.value
+  };
+
+  if (Object.values(data).some(v => !v)) {
+    alert("Please complete all fields.");
+    return;
+  }
+
+  const res = await fetch(`/predict-treatment?patient_id=${patient_id}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  });
+
+  const result = await res.json();
+
+  if (result.error) {
+    alert(result.error);
+    return;
+  }
+
+  // Save locally for PDF
+  localStorage.setItem("treatmentResult", JSON.stringify(result));
+
+  document.getElementById("formSection").classList.add("hidden");
+  document.getElementById("resultSection").classList.remove("hidden");
+
+  treatmentName.textContent = result.recommended;
+  confidenceBadge.textContent = `${result.confidence}%`;
+
+  const alternativesContainer = document.getElementById("alternativesContainer");
+  alternativesContainer.innerHTML = "";
+
+  result.alternatives.forEach(a => {
+    const span = document.createElement("span");
+    span.className = "alt-tag";
+    span.textContent = a;
+    alternativesContainer.appendChild(span);
+  });
+
+  if (result.recommended.toLowerCase().includes("chemo")) {
+    resultCard.classList.add("malignant");
+  }
+
+}
+
+/* -------------------------------
+   GO TO REPORT
+--------------------------------*/
+document.getElementById("downloadReportBtn").onclick = () => {
+  window.location.href = `/report?patient_id=${patient_id}`;
+};
+
+</script>
+
+</body>
+</html>
