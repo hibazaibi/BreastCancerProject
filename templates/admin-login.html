@@ -4,88 +4,219 @@
 <meta charset="UTF-8">
 <title>Admin Login – BreastCare AI</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-  font-family: 'Plus Jakarta Sans';
-  background: linear-gradient(135deg, #fff, #fde4ec);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: linear-gradient(135deg, #fdf2f8 0%, #fce4ec 100%);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 420px;
 }
 
 .login-box {
   background: white;
-  padding: 2.5rem;
-  width: 380px;
-  border-radius: 18px;
-  box-shadow: 0 12px 32px rgba(0,0,0,0.15);
+  padding: 3rem 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 15px 40px rgba(233, 30, 99, 0.15);
   text-align: center;
+  border: 1px solid rgba(233, 30, 99, 0.1);
+}
+
+.logo {
+  color: #e91e63;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 h2 {
   color: #e91e63;
   font-weight: 800;
-  margin-bottom: 2rem;
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
 }
 
-input {
+.subtitle {
+  color: #666;
+  margin-bottom: 2.5rem;
+  font-size: 0.95rem;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.input-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #333;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.input-field {
   width: 100%;
-  margin-bottom: 1.2rem;
-  padding: 1rem;
+  padding: 1rem 1.2rem;
   border-radius: 12px;
-  border: 2px solid #eee;
+  border: 2px solid #e2e8f0;
   font-size: 1rem;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: all 0.3s ease;
+  background: #fafafa;
 }
 
-button {
+.input-field:focus {
+  outline: none;
+  border-color: #e91e63;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(233, 30, 99, 0.1);
+}
+
+.login-btn {
   width: 100%;
   padding: 1rem;
   background: #e91e63;
   border: none;
   color: white;
   font-weight: 700;
+  font-size: 1rem;
   border-radius: 12px;
   cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin-top: 0.5rem;
 }
-button:hover { background: #c2185b; }
-.error { color: red; margin-top: 1rem; }
+
+.login-btn:hover {
+  background: #c2185b;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(233, 30, 99, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.error {
+  color: #d32f2f;
+  margin-top: 1.5rem;
+  padding: 0.8rem;
+  background: #ffebee;
+  border-radius: 8px;
+  border: 1px solid #ffcdd2;
+  font-size: 0.9rem;
+  display: none;
+}
+
+.error.show {
+  display: block;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-box {
+    padding: 2rem 1.5rem;
+    margin: 10px;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  .logo {
+    font-size: 2rem;
+  }
+}
 </style>
 </head>
 
 <body>
-<div class="login-box">
-  <h2><i class="fas fa-user-shield"></i> Admin Login</h2>
+<div class="login-container">
+  <div class="login-box">
+    <div class="logo">
+      <i class="fas fa-user-shield"></i>
+    </div>
 
-  <input type="text" id="username" placeholder="Username">
-  <input type="password" id="password" placeholder="Password">
+    <h2>Admin Login</h2>
+    <p class="subtitle">Access the BreastCare AI admin dashboard</p>
 
-  <button onclick="login()">Login</button>
+    <div class="input-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" class="input-field" placeholder="Enter your username">
+    </div>
 
-  <p class="error" id="errorMsg"></p>
+    <div class="input-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" class="input-field" placeholder="Enter your password">
+    </div>
+
+    <button class="login-btn" onclick="login()">
+      <i class="fas fa-sign-in-alt"></i> Login
+    </button>
+
+    <div class="error" id="errorMsg"></div>
+  </div>
 </div>
 
 <script>
 async function login() {
-  const username = document.getElementById("username").value;
-  const password = document.getElementById("password").value;
+  const username = document.getElementById("username").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const errorMsg = document.getElementById("errorMsg");
 
-  const res = await fetch("/admin-login", {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify({username, password})
-  });
+  // Clear previous errors
+  errorMsg.classList.remove('show');
+  errorMsg.textContent = '';
 
-  const data = await res.json();
+  // Basic validation
+  if (!username || !password) {
+    errorMsg.textContent = "Please enter both username and password";
+    errorMsg.classList.add('show');
+    return;
+  }
 
-  if (!data.success) {
-      document.getElementById("errorMsg").textContent = "Invalid username or password";
-  } else {
+  try {
+    const res = await fetch("/admin-login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({username, password})
+    });
+
+    const data = await res.json();
+
+    if (!data.success) {
+      errorMsg.textContent = "Invalid username or password";
+      errorMsg.classList.add('show');
+    } else {
       window.location.href = "/admin";
+    }
+  } catch (error) {
+    errorMsg.textContent = "Network error. Please try again.";
+    errorMsg.classList.add('show');
   }
 }
+
+// Allow login on Enter key press
+document.addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    login();
+  }
+});
 </script>
 </body>
 </html>

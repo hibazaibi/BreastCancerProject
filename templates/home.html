@@ -105,23 +105,28 @@
   transform: scale(1.2);
   color: var(--primary-dark);
 }
-    .btn-nav {
-      background: var(--primary);
-      color: var(--white);
-      padding: 0.6rem 1.5rem;
-      border-radius: 8px;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      border: none;
-      cursor: pointer;
-    }
+  /* Admin Button - Pink background with white text */
+.btn-nav {
+  background: var(--primary) !important;
+  color: var(--white) !important;
+  padding: 0.6rem 1.5rem;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
-    .btn-nav:hover {
-      background: var(--primary-dark);
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-md);
-    }
+.btn-nav:hover {
+  background: var(--primary-dark) !important;
+  color: var(--white) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
 
     /* HERO SECTION */
     .hero {
@@ -783,7 +788,31 @@ body, html {
   --secondary: #ff5c8d;
   --success: #06a77d;
 }
-
+/* Assessment message styling */
+.assessment {
+  background: #fff3cd;
+  border-left: 5px solid #ffc107;
+  padding: 15px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+.severity-urgent {
+  border-left-color: #f44336;
+  background: #ffebee;
+}
+.severity-high {
+  border-left-color: #ff9800;
+  background: #fff3e0;
+}
+.severity-moderate {
+  border-left-color: #2196f3;
+  background: #e3f2fd;
+}
+.severity-low {
+  border-left-color: #4caf50;
+  background: #e8f5e8;
+}
 
 
   </style>
@@ -1111,13 +1140,38 @@ function addMessage(text, sender, isProcessing = false) {
   chatBody.appendChild(div);
   chatBody.scrollTop = chatBody.scrollHeight;
 }
-
 /* -------------------------
-   Send text message
+   Display assessment with severity styling
+--------------------------*/
+function displayAssessment(assessment) {
+  if (!assessment) return;
+
+  const sev = assessment.severity.toLowerCase();
+  const ass = document.createElement('div');
+  ass.className = `message bot-message assessment severity-${sev}`;
+
+  const symptomsText = assessment.symptoms && assessment.symptoms.length > 0
+    ? assessment.symptoms.join(', ')
+    : 'No clear symptoms identified';
+
+  ass.innerHTML = `
+    <strong>Assessment:</strong><br>
+    <strong>${assessment.severity}</strong> – ${symptomsText}<br>
+    <ul style="margin:8px 0; padding-left:20px;">
+      ${assessment.recommendations.map(r => `<li>${r}</li>`).join('')}
+    </ul>
+    <em>Confidence: ${(assessment.confidence * 100).toFixed(0)}%</em>
+  `;
+  chatBody.appendChild(ass);
+  chatBody.scrollTop = chatBody.scrollHeight;
+}
+/* -------------------------
+   Send text message - FIXED VERSION
 --------------------------*/
 async function sendMessage(text) {
   if (!text.trim()) return;
 
+  // Add user message (NO "You said" for text)
   addMessage(text, 'user');
   addMessage('Analyzing your message...', 'bot', true);
 
@@ -1129,12 +1183,20 @@ async function sendMessage(text) {
     });
 
     const data = await res.json();
-    document.querySelector('.processing')?.remove();
+
+    // Remove processing message
+    const thinking = chatBody.querySelector('.processing');
+    if (thinking) thinking.remove();
 
     if (data.response) {
       addMessage(data.response, 'bot');
+
+      // Display assessment if available
+      if (data.assessment) {
+        displayAssessment(data.assessment);
+      }
     } else {
-      addMessage('Sorry, I didn’t understand. Can you rephrase?', 'bot');
+      addMessage('Sorry, I didn\'t understand. Can you rephrase?', 'bot');
     }
   } catch (e) {
     document.querySelector('.processing')?.remove();
@@ -1143,13 +1205,14 @@ async function sendMessage(text) {
 }
 
 /* -------------------------
-   Send voice audio
+   Send voice audio - FIXED VERSION
 --------------------------*/
 async function sendVoice(blob) {
   const reader = new FileReader();
   reader.onloadend = async () => {
     const base64 = reader.result;
 
+    // For voice: Show "You said" with transcription
     addMessage('<i class="fas fa-microphone"></i> Recording sent...', 'user');
     addMessage('Transcribing...', 'bot', true);
 
@@ -1164,8 +1227,14 @@ async function sendVoice(blob) {
       document.querySelector('.processing')?.remove();
 
       if (data.success) {
+        // Show transcription for voice input
         addMessage(`<strong>You said:</strong> <em>${data.transcription}</em>`, 'user');
         addMessage(data.response, 'bot');
+
+        // Display assessment if available
+        if (data.assessment) {
+          displayAssessment(data.assessment);
+        }
       } else {
         addMessage('❓ Could not interpret voice. Try again!', 'bot');
       }

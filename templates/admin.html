@@ -633,9 +633,21 @@
             let mamMal = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "MALIGNANT").length;
             let mamBen = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "BENIGN").length;
 
-            let usMal  = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "MALIGNANT").length;
-            let usBen  = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "BENIGN").length;
-            let usNorm = diagnoses.filter(d => d.type === "ultrasound" && d.diagnosis === "NORMAL").length;
+            let usMal = diagnoses.filter(d =>
+    d.type && d.type.toLowerCase() === "ultrasound" &&
+    d.diagnosis && d.diagnosis.toUpperCase() === "MALIGNANT"
+).length;
+
+let usBen = diagnoses.filter(d =>
+    d.type && d.type.toLowerCase() === "ultrasound" &&
+    d.diagnosis && d.diagnosis.toUpperCase() === "BENIGN"
+).length;
+
+let usNorm = diagnoses.filter(d =>
+    d.type && d.type.toLowerCase() === "ultrasound" &&
+    d.diagnosis && d.diagnosis.toUpperCase() === "NORMAL"
+).length;
+
 
             let treatCounts = {};
             diagnoses.filter(d => d.type === "treatment").forEach(d => {
