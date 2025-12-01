@@ -1004,6 +1004,56 @@ def admin_diagnoses():
 
     return jsonify(output)
 
+
+# Add these routes to your Flask app.py
+
+# ==================== ROUTES FOR PATIENT HISTORY ====================
+@app.route('/api/patients/<int:patient_id>')
+def get_patient_details(patient_id):
+    """Get detailed patient information"""
+    try:
+        patient = Patient.query.get(patient_id)
+        if not patient:
+            return jsonify({"error": "Patient not found"}), 404
+
+        return jsonify({
+            "id": patient.id,
+            "name": patient.name,
+            "age": patient.age,
+            "email": patient.email,
+            "gender": "Female",  # You should add a gender field to your Patient model
+            "created_at": str(patient.created_at)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route('/api/patients/<int:patient_id>/diagnoses')
+def get_patient_diagnoses(patient_id):
+    """Get diagnoses for a specific patient"""
+    try:
+        diagnoses = Diagnosis.query.filter_by(patient_id=patient_id).order_by(Diagnosis.created_at.desc()).all()
+
+        result = []
+        for d in diagnoses:
+            result.append({
+                "id": d.id,
+                "type": d.type,
+                "diagnosis": d.diagnosis,
+                "malignant": d.malignant,
+                "benign": d.benign,
+                "normal": 100 - (d.malignant or 0) - (d.benign or 0) if d.type == "ultrasound" else None,
+                "confidence": d.confidence,
+                "created_at": str(d.created_at),
+                "image_base64": d.image_base64
+            })
+
+        return jsonify(result)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Add this to your existing routes section
 @app.route('/predict-ultrasound', methods=['POST'])
 def predict_ultrasound():
     if 'file' not in request.files:

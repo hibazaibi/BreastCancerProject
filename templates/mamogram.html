@@ -808,7 +808,8 @@ reader.readAsDataURL(file);
  function showResult(data) {
     const mammo = data.mammo_result;
     const decision = data.decision;
-
+    const oldActions = document.querySelector(".actions-container");
+    if (oldActions) oldActions.remove();
     const malignantProb = parseFloat(mammo.probability_malignant);
     const benignProb = parseFloat(mammo.probability_benign);
     const confidence = parseFloat(mammo.confidence);
@@ -850,6 +851,7 @@ reader.readAsDataURL(file);
     // 🎛️ SHOW USER OPTIONS
     // ================================
     const actionsContainer = document.createElement("div");
+    actionsContainer.className = "actions-container";
     actionsContainer.style.marginTop = "20px";
     actionsContainer.style.display = "flex";
     actionsContainer.style.gap = "15px";

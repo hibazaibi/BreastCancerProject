@@ -582,243 +582,246 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    async function loadPatients() {
-        try {
-            // Fetch patients data from your API
-            const res = await fetch("/api/admin/patients");
-            const data = await res.json();
-            document.getElementById("totalPatients").innerText = data.length;
+async function loadPatients() {
+    try {
+        // Fetch both patients & diagnoses at the same time
+        const [patientsRes, diagnosesRes] = await Promise.all([
+            fetch("/api/admin/patients"),
+            fetch("/api/admin/diagnoses")
+        ]);
 
-            const table = document.getElementById("patientsTable");
-            table.innerHTML = "";
+        const patients = await patientsRes.json();
+        const diagnoses = await diagnosesRes.json();
 
-            data.forEach(p => {
-                // Determine status based on last diagnosis or other criteria
-                const status = getStatusFromPatientData(p);
-                const statusClass = status.toLowerCase();
+        // Save diagnoses globally
+        window.allDiagnoses = diagnoses;
 
-                table.innerHTML += `
-                    <tr>
-                        <td>${p.name}</td>
-                        <td>${p.age}</td>
-                        <td>${p.email}</td>
-                        <td>${p.diagnosis_count}</td>
-                        <td>${p.last_diagnosis}</td>
-                        <td><span class="status-badge ${statusClass}">${status}</span></td>
-                        <td><button class="btn-view" onclick="view(${p.id})">View</button></td>
-                    </tr>`;
-            });
+        // Update stats
+        document.getElementById("totalPatients").innerText = patients.length;
+        document.getElementById("totalDiagnoses").innerText = diagnoses.length;
 
-            // Fetch diagnoses data from your API
-            const diagRes = await fetch("/api/admin/diagnoses");
-            const diagnoses = await diagRes.json();
-            document.getElementById("totalDiagnoses").innerText = diagnoses.length;
+        // ---- Build Patients Table ----
+        const table = document.getElementById("patientsTable");
+        table.innerHTML = "";
 
-            // Calculate positive and negative cases based on your actual data
-            const positiveCases = diagnoses.filter(d =>
-                d.diagnosis === "MALIGNANT" ||
-                (d.type === "treatment" && d.diagnosis !== "NORMAL")
-            ).length;
+        patients.forEach(p => {
+            const count = getDiagnosisCount(p.id);
+            const lastDiag = getLastDiagnosisForPatient(p.id);
+            const status = getStatusFromDiagnoses(p.id);
+            const statusClass = status.toLowerCase();
 
-            const negativeCases = diagnoses.filter(d =>
-                d.diagnosis === "BENIGN" ||
-                d.diagnosis === "NORMAL"
-            ).length;
+            table.innerHTML += `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>${p.age}</td>
+                    <td>${p.email}</td>
+                    <td>${count}</td>
+                    <td>${lastDiag}</td>
+                    <td><span class="status-badge ${statusClass}">${status}</span></td>
+                    <td><button class="btn-view" onclick="view(${p.id})">View</button></td>
+                </tr>
+            `;
+        });
 
-            document.getElementById("positiveCases").innerText = positiveCases;
-            document.getElementById("negativeCases").innerText = negativeCases;
+        // ---- Positive & Negative Counts ----
+        const positiveCases = diagnoses.filter(d =>
+            d.diagnosis.toUpperCase() === "MALIGNANT"
+        ).length;
 
-            // Calculate chart data from your actual diagnoses
-            let mamMal = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "MALIGNANT").length;
-            let mamBen = diagnoses.filter(d => d.type === "mammogram" && d.diagnosis === "BENIGN").length;
+        const negativeCases = diagnoses.filter(d =>
+            ["BENIGN", "NORMAL"].includes(d.diagnosis.toUpperCase())
+        ).length;
 
-            let usMal = diagnoses.filter(d =>
-    d.type && d.type.toLowerCase() === "ultrasound" &&
-    d.diagnosis && d.diagnosis.toUpperCase() === "MALIGNANT"
-).length;
+        document.getElementById("positiveCases").innerText = positiveCases;
+        document.getElementById("negativeCases").innerText = negativeCases;
 
-let usBen = diagnoses.filter(d =>
-    d.type && d.type.toLowerCase() === "ultrasound" &&
-    d.diagnosis && d.diagnosis.toUpperCase() === "BENIGN"
-).length;
+        // ---- Chart Data ----
+        let mamMal = diagnoses.filter(d =>
+            d.type === "mammogram" && d.diagnosis.toUpperCase() === "MALIGNANT"
+        ).length;
 
-let usNorm = diagnoses.filter(d =>
-    d.type && d.type.toLowerCase() === "ultrasound" &&
-    d.diagnosis && d.diagnosis.toUpperCase() === "NORMAL"
-).length;
+        let mamBen = diagnoses.filter(d =>
+            d.type === "mammogram" && d.diagnosis.toUpperCase() === "BENIGN"
+        ).length;
 
+        let usMal = diagnoses.filter(d =>
+            d.type === "ultrasound" && d.diagnosis.toUpperCase() === "MALIGNANT"
+        ).length;
 
-            let treatCounts = {};
-            diagnoses.filter(d => d.type === "treatment").forEach(d => {
-                treatCounts[d.diagnosis] = (treatCounts[d.diagnosis] || 0) + 1;
-            });
+        let usBen = diagnoses.filter(d =>
+            d.type === "ultrasound" && d.diagnosis.toUpperCase() === "BENIGN"
+        ).length;
 
-            let dateCounts = {};
-            diagnoses.forEach(d => {
-                let date = d.created_at.split(" ")[0];
-                dateCounts[date] = (dateCounts[date] || 0) + 1;
-            });
+        let usNorm = diagnoses.filter(d =>
+            d.type === "ultrasound" && d.diagnosis.toUpperCase() === "NORMAL"
+        ).length;
 
-            drawMammoPie(mamMal, mamBen);
-            drawUltraPie(usMal, usBen, usNorm);
-            drawTreatmentChart(treatCounts);
-            drawLineChart(dateCounts);
+        // Treatment distribution
+        let treatCounts = {};
+        diagnoses.filter(d => d.type === "treatment").forEach(d => {
+            treatCounts[d.diagnosis] = (treatCounts[d.diagnosis] || 0) + 1;
+        });
 
-            window.exportData = data;
+        // Diagnoses over time
+        let dateCounts = {};
+        diagnoses.forEach(d => {
+            let date = d.created_at.split(" ")[0];
+            dateCounts[date] = (dateCounts[date] || 0) + 1;
+        });
 
-        } catch (error) {
-            console.error("Error loading dashboard data:", error);
+        // Draw charts
+        drawMammoPie(mamMal, mamBen);
+        drawUltraPie(usMal, usBen, usNorm);
+        drawTreatmentChart(treatCounts);
+        drawLineChart(dateCounts);
+
+        window.exportData = patients;
+
+    } catch (error) {
+        console.error("Error loading dashboard data:", error);
+    }
+}
+
+/* ------------------------- Helper Functions ------------------------- */
+
+// Count diagnoses for patient
+function getDiagnosisCount(patientId) {
+    return window.allDiagnoses.filter(d => d.patient_id === patientId).length;
+}
+
+// Get last diagnosis for patient
+function getLastDiagnosisForPatient(patientId) {
+    const list = window.allDiagnoses.filter(d => d.patient_id === patientId);
+    if (list.length === 0) return "No diagnosis";
+
+    list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    return list[0].diagnosis;
+}
+
+// Determine patient status
+function getStatusFromDiagnoses(patientId) {
+    const list = window.allDiagnoses.filter(d =>
+        d.patient_id === patientId &&
+        ["MALIGNANT", "BENIGN", "NORMAL"].includes(d.diagnosis.toUpperCase())
+    );
+
+    if (list.length === 0) return "Normal";
+
+    list.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const last = list[0].diagnosis.toUpperCase();
+
+    if (last === "MALIGNANT") return "Malignant";
+    if (last === "BENIGN") return "Benign";
+    return "Normal";
+}
+
+/* ---------------------------- CHARTS ---------------------------- */
+
+function drawMammoPie(mamMal, mamBen) {
+    new Chart(document.getElementById("mammoPie"), {
+        type: "pie",
+        data: {
+            labels: ["Malignant", "Benign"],
+            datasets: [{
+                data: [mamMal, mamBen],
+                backgroundColor: ["#e91e63", "#06a77d"]
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function drawUltraPie(usMal, usBen, usNorm) {
+    new Chart(document.getElementById("ultraPie"), {
+        type: "pie",
+        data: {
+            labels: ["Malignant", "Benign", "Normal"],
+            datasets: [{
+                data: [usMal, usBen, usNorm],
+                backgroundColor: ["#e91e63", "#06a77d", "#2196f3"]
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function drawTreatmentChart(treatCounts) {
+    new Chart(document.getElementById("treatChart"), {
+        type: "pie",
+        data: {
+            labels: Object.keys(treatCounts),
+            datasets: [{
+                data: Object.values(treatCounts),
+                backgroundColor: [
+                    "#e91e63", "#06a77d", "#2196f3",
+                    "#ff9800", "#9c27b0", "#3f51b5"
+                ]
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+function drawLineChart(dateCounts) {
+    const labels = Object.keys(dateCounts).sort();
+    const values = labels.map(k => dateCounts[k]);
+
+    new Chart(document.getElementById("lineChart"), {
+        type: "line",
+        data: {
+            labels,
+            datasets: [{
+                label: "Diagnoses Over Time",
+                data: values,
+                borderColor: "#e91e63",
+                backgroundColor: "rgba(233,30,99,0.2)",
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } }
         }
-    }
+    });
+}
 
-    // Helper function to determine patient status
-    function getStatusFromPatientData(patient) {
-        // You can modify this based on your actual data structure
-        // This is a placeholder - adjust according to your needs
-        if (patient.last_diagnosis && patient.last_diagnosis.includes("MALIGNANT")) {
-            return "Malignant";
-        } else if (patient.last_diagnosis && patient.last_diagnosis.includes("BENIGN")) {
-            return "Benign";
-        } else {
-            return "Normal";
-        }
-    }
+/* ------------------------- Export + View ------------------------- */
 
-    function drawMammoPie(mamMal, mamBen) {
-        new Chart(document.getElementById("mammoPie"), {
-            type: "pie",
-            data: {
-                labels: ["Malignant", "Benign"],
-                datasets: [{
-                    data: [mamMal, mamBen],
-                    backgroundColor: ["#e91e63", "#06a77d"]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
+function view(id) {
+    localStorage.setItem("patient_id", id);
+    window.location.href = "/history";
+}
 
-    function drawUltraPie(usMal, usBen, usNorm) {
-        new Chart(document.getElementById("ultraPie"), {
-            type: "pie",
-            data: {
-                labels: ["Malignant", "Benign", "Normal"],
-                datasets: [{
-                    data: [usMal, usBen, usNorm],
-                    backgroundColor: ["#e91e63", "#06a77d", "#2196f3"]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
-
-    function drawTreatmentChart(treatCounts) {
-        new Chart(document.getElementById("treatChart"), {
-            type: "pie",
-            data: {
-                labels: Object.keys(treatCounts),
-                datasets: [{
-                    data: Object.values(treatCounts),
-                    backgroundColor: [
-                        "#e91e63", "#06a77d", "#2196f3",
-                        "#ff9800", "#9c27b0", "#3f51b5"
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    }
-
-    function drawLineChart(dateCounts) {
-        const labels = Object.keys(dateCounts).sort();
-        const values = labels.map(k => dateCounts[k]);
-
-        new Chart(document.getElementById("lineChart"), {
-            type: "line",
-            data: {
-                labels,
-                datasets: [{
-                    label: "Diagnoses Over Time",
-                    data: values,
-                    borderColor: "#e91e63",
-                    backgroundColor: "rgba(233,30,99,0.2)",
-                    fill: true,
-                    tension: 0.3
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    }
-
-    function view(id) {
-        localStorage.setItem("patient_id", id);
-        window.location.href = "/history";
-    }
-
-    function exportCSV() {
-        let csv = "Name,Age,Email,Diagnosis Count,Last Diagnosis\n";
-        window.exportData.forEach(p => {
-            csv += `${p.name},${p.age},${p.email},${p.diagnosis_count},${p.last_diagnosis}\n`;
-        });
-
-        const blob = new Blob([csv], { type: "text/csv" });
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "breastcare_patients.csv";
-        a.click();
-    }
-
-    // Search functionality
-    document.getElementById("searchInput").addEventListener("input", function () {
-        let value = this.value.toLowerCase();
-        let rows = document.querySelectorAll("#patientsTable tr");
-
-        rows.forEach(row => {
-            let text = row.innerText.toLowerCase();
-            row.style.display = text.includes(value) ? "" : "none";
-        });
+function exportCSV() {
+    let csv = "Name,Age,Email,Diagnosis Count,Last Diagnosis\n";
+    window.exportData.forEach(p => {
+        let count = getDiagnosisCount(p.id);
+        let last = getLastDiagnosisForPatient(p.id);
+        csv += `${p.name},${p.age},${p.email},${count},${last}\n`;
     });
 
-    // Initialize the dashboard
-    loadPatients();
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "breastcare_patients.csv";
+    a.click();
+}
+
+/* ------------------------- Search ------------------------- */
+
+document.getElementById("searchInput").addEventListener("input", function () {
+    let value = this.value.toLowerCase();
+    let rows = document.querySelectorAll("#patientsTable tr");
+    rows.forEach(row => row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none");
+});
+
+// Initialize dashboard
+loadPatients();
 </script>
+
 </body>
 </html>
