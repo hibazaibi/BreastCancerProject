@@ -65,31 +65,29 @@ MODEL_PATH = "EfficientNetB0_best.keras"
 
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max
-model = tf.keras.models.load_model('static/model/breast_cancer_model.keras')  # chemin exact
-
 # Create upload folder
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-#load ultrasound
+# ==================== LOAD ULTRASOUND MODEL ====================
+print("🔄 Loading ultrasound model...")
 try:
-    model = tf.keras.models.load_model('static/model/breast_cancer_model.keras')  # ← change le nom/chemin
-    print("Modèle chargé avec succès !")
+    ultrasound_model = tf.keras.models.load_model(
+        'static/model/breast_cancer_model.keras'
+    )
+    print("✅ Ultrasound model loaded successfully!")
 except Exception as e:
-    print("ERREUR CRITIQUE : Impossible de charger le modèle")
-    print(e)
-    model = None
+    print("❌ Failed to load ultrasound model:", e)
+    ultrasound_model = None
+
+
 # ==================== LOAD MAMMOGRAM MODEL ====================
-print(f"\n{'=' * 60}")
-print(f"🔄 Loading mammogram model: {MODEL_PATH}")
+print("🔄 Loading mammogram model...")
 try:
-    model = tf.keras.models.load_model(MODEL_PATH)
-    print(f"✅ Mammogram model loaded successfully!")
-    print(f"   Input shape: {model.input_shape}")
-    print(f"   Output shape: {model.output_shape}")
-    print(f"   Model: EfficientNetB0 (AUC: 0.8052)")
+    mammo_model = tf.keras.models.load_model(MODEL_PATH)
+    print("✅ Mammogram model loaded successfully!")
 except Exception as e:
-    print(f"❌ Failed to load mammogram model: {e}")
-    model = None
-print(f"{'=' * 60}\n")
+    print("❌ Failed to load mammogram model:", e)
+    mammo_model = None
+
 
 # ==================== INITIALIZE GROQ CLIENT ====================
 groq_api_key = os.environ.get("GROQ_API_KEY")
@@ -208,12 +206,12 @@ def preprocess_image(image_path):
 
 def predict_image(image_path):
     """Make prediction on preprocessed image"""
-    if model is None:
+    if mammo_model is None:
         return {"error": "Model not loaded"}
 
     try:
         img_array = preprocess_image(image_path)
-        prediction = model.predict(img_array, verbose=0)[0][0]
+        prediction = mammo_model.predict(img_array, verbose=0)[0][0]
 
         probability = float(prediction)
         is_malignant = probability > 0.5
@@ -822,7 +820,7 @@ def health():
     """Health check endpoint"""
     return jsonify({
         "status": "healthy",
-        "mammogram_model_loaded": model is not None,
+        "mammogram_model_loaded": mammo_model is not None,
         "chatbot_enabled": groq_client is not None,
         "model_name": "EfficientNetB0",
         "model_performance": {
@@ -835,13 +833,13 @@ def health():
 @app.route('/model-info')
 def model_info():
     """Get detailed model information"""
-    if model is None:
+    if mammo_model is None:
         return jsonify({"error": "Model not loaded"}), 500
 
     return jsonify({
         "model_name": "EfficientNetB0",
-        "input_shape": str(model.input_shape),
-        "output_shape": str(model.output_shape),
+        "input_shape": str(mammo_model.input_shape),
+        "output_shape": str(mammo_model.output_shape),
         "performance": {
             "accuracy": 70.14,
             "auc_roc": 0.8052,
@@ -1066,12 +1064,12 @@ def predict_ultrasound():
     try:
         # 1. Ouvre + resize intelligent 512x512
         img = Image.open(file.stream).convert('RGB')
-        img = img.resize((512, 512), Image.Resampling.LANCZOS)
+        img = img.resize((224, 224), Image.Resampling.LANCZOS)
         img_array = np.array(img, dtype=np.float32) / 255.0
         img_array = np.expand_dims(img_array, axis=0)
 
         # 2. Prédiction
-        pred = model.predict(img_array, verbose=0)[0]
+        pred = ultrasound_model.predict(img_array, verbose=0)[0]
 
         # 3. Applique softmax si nécessaire
         probabilities = tf.nn.softmax(pred).numpy() if len(pred) > 1 else [1.0 - pred[0], pred[0]]
@@ -1293,7 +1291,7 @@ if __name__ == '__main__':
     print("\n" + "=" * 70)
     print("🚀 UNIFIED BREAST CANCER DETECTION & SUPPORT APPLICATION")
     print("=" * 70)
-    print(f"📊 Mammogram Model: {'✅ Loaded' if model else '❌ Not Loaded'}")
+    print(f"📊 Mammogram Model: {'✅ Loaded' if mammo_model else '❌ Not Loaded'}")
     print(f"   └─ EfficientNetB0 (AUC: 0.8052, Accuracy: 70.14%)")
     print(f"💬 Chatbot: {'✅ Enabled' if groq_client else '❌ Disabled'}")
     print(f"   └─ Groq Whisper + LLaMA 3.3 70B")
